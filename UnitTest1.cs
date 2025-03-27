@@ -6,7 +6,10 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using SeleniumExtras.WaitHelpers;
 using OpenQA.Selenium.Interactions;
-
+using OfficeOpenXml;
+using System.IO;
+using NPOI.SS.Formula.Functions;
+using OpenQA.Selenium.DevTools.V131.LayerTree;
 
 namespace BaoDamSelenium
 {
@@ -23,10 +26,12 @@ namespace BaoDamSelenium
             driver.Manage().Window.Maximize();
             driver.Navigate().GoToUrl(URL);
             System.Threading.Thread.Sleep(5000);
+            //epplus
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial; 
         }
 
         [Test]
-        public void Test1()
+        public void IntergratedAddToCart()
         {
             ////1. Module Product
 
@@ -89,7 +94,7 @@ namespace BaoDamSelenium
             elm12.Click();
         }
         [Test]
-        public void Test2()
+        public void Dangki()
         {
             ////Module 3 : Dang ki dang nhap
             //tìm phần tử account
@@ -104,16 +109,18 @@ namespace BaoDamSelenium
             IWebElement elm2 = driver.FindElement(By.XPath("/html/body/div/header/div[1]/div/div/div[2]/div/ul/li[3]/ul/li[2]/a"));
             elm2.Click();
 
+
             //điền email
             //mỗi lần test thì đổi tên tk một lần tránh trùng token test trước
             IWebElement elm3 = driver.FindElement(By.XPath("//*[@id=\"Email\"]"));
-            elm3.SendKeys("truongtrong@gmail22.com");
+            elm3.SendKeys("truongtrong1234@gmail.com");
             //password
             IWebElement elm4 = driver.FindElement(By.XPath("//*[@id=\"Password\"]"));
             elm4.SendKeys("123456");
             //confirm
             IWebElement elm5 = driver.FindElement(By.XPath("//*[@id=\"ConfirmPassword\"]"));
             elm5.SendKeys("123456");
+
             //click reigster
             IWebElement elm0 = driver.FindElement(By.XPath("/ html / body / div / div[3] / div / div / form / div[5] / div / input"));
             elm0.Click();
@@ -125,11 +132,62 @@ namespace BaoDamSelenium
             actions1.MoveToElement(elm).Perform();
             System.Threading.Thread.Sleep(1000);
             //logout
-            IWebElement elm6 = driver.FindElement(By.XPath("/html/body/div/header/div[1]/div/div/div[2]/div/ul/li[3]/ul/li[2]/a"));
+            IWebElement elm6 = driver.FindElement(By.CssSelector("body > div > header > div.top_nav > div > div > div.col-md-6.text-right > div > ul > li.account > ul > li:nth-child(2) > a"));
             elm6.Click();
         }
         [Test]
-        public void Test3()
+        public void LoginUser()
+        {
+            string excelFilePath = "C:\\Users\\ADMIN\\Desktop\\test.xlsx";
+
+            //mở file excel
+            using (var excelPackage = new ExcelPackage(new FileInfo(excelFilePath)))
+            {
+                //lấy worksheet đầu tiên
+                var worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+
+                //check ws co ton tai hay khong
+                if (worksheet != null)
+                {
+                    //lay du lieu excel tung hang 1
+                    for (int row = 2; row <= worksheet.Dimension.End.Row; row++) // start hang 2
+                    {
+                        //A2
+                        string username = worksheet.Cells[row, 1].Value?.ToString();
+                        //B2
+                        string Password = worksheet.Cells[row, 2].Value?.ToString();
+                        //dieu kien
+                        bool loginSuccess = false;
+
+                        if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(Password))
+                        {
+                            driver.Navigate().GoToUrl("https://localhost:44375/account/login");
+                            driver.FindElement(By.Id("UserName")).Click();
+                            driver.FindElement(By.Id("UserName")).SendKeys(username);
+                            driver.FindElement(By.Id("Password")).Click();
+                            driver.FindElement(By.Id("Password")).SendKeys(Password);
+                            //login click
+                            driver.FindElement(By.XPath("//*[@id=\"loginForm\"]/form/div[4]/div/input")).Click();
+
+                            Thread.Sleep(1000);
+                            string currentUrlAfterLogin = driver.Url;
+                            if (driver.Url == "https://localhost:44375/")
+                            {
+                                loginSuccess = true; // Gán true nếu đăng nhập thành công
+                            }
+                        }
+                        //ghi ket qua ra file excel
+                        worksheet.Cells[row, 3].Value = loginSuccess ? "True" : "False";
+
+                    }
+                }
+                else { Console.WriteLine("Khong tim thay worksheet trong tep excel"); }
+                //save vao tep excel
+                excelPackage.Save();
+            }
+        }
+        [Test]
+        public void RollPageDown()
         {
             //review trang chủ (roll từ đầu xuống cuối)
             
@@ -147,23 +205,26 @@ namespace BaoDamSelenium
             actions4.SendKeys(Keys.PageDown).Perform();
             Thread.Sleep(500);
 
-            //subscribe mail
-            IWebElement elm = driver.FindElement(By.XPath("//*[@id=\"newsletter_email\"]\r\n"));
-            elm.SendKeys("trong@mail.com");
-            //Click sub
-            IWebElement elm2 = driver.FindElement(By.XPath("//*[@id=\"newsletter_submit\"]"));
+            //Click san pham xem detail
+            IWebElement elm1 = driver.FindElement(By.XPath("/html/body/div/div[7]/div/div[2]/div/div/div[1]/div[1]/div/div[2]/div/div/div[1]/div[4]/h6/a"));
+            elm1.Click();
+            //Click tang sl san pham
+            IWebElement elm2 = driver.FindElement(By.XPath("/html/body/div/div[3]/div[2]/div[2]/div/div[4]/div[1]/span[3]"));
             elm2.Click();
-
-            //xử lý thông báo khi sub thành công
+            elm2.Click();
+            //add to cart
+            IWebElement elm3 = driver.FindElement(By.XPath("/html/body/div/div[3]/div[2]/div[2]/div/div[4]/div[2]/a"));
+            elm3.Click();
+            //thông báo
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.AlertIsPresent());
             IAlert alert = driver.SwitchTo().Alert();
-            Console.WriteLine("Alert text: OK" + alert.Text);
+            Console.WriteLine("Alert text: Thêm sản phẩm vào giở hàng thành công!" + alert.Text);
             alert.Accept();
-
+            
         }
         [Test]
-        public void Test4()
+        public void Contact()
         {
             //Module 4 contact
             //clik vào liên hệ xem ggmaps
@@ -185,7 +246,7 @@ namespace BaoDamSelenium
 
         }
         [Test]
-        public void Test5()
+        public void AdminLogging()
         {
             //Module5 Admin 
             //Dang nhap admin
@@ -203,9 +264,9 @@ namespace BaoDamSelenium
             elm2.Click();
 
             //Click quản lí sản phẩm
-            WebDriverWait wait1 = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-            IWebElement elm3 = driver.FindElement(By.XPath("/html/body/div/aside[1]/div[1]/nav/ul/li[7]/a/p"));
-            elm3.Click();
+            //WebDriverWait wait1 = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            //IWebElement elm3 = driver.FindElement(By.XPath("/html/body/div/aside[1]/div[1]/nav/ul/li[7]/a/p"));
+            //elm3.Click();
 
             //click sản phẩm
             //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
