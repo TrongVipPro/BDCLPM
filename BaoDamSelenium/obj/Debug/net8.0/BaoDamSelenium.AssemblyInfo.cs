@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BaoDamSelenium")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b443aa632eec1f9c399ac1c8f1e4aec9c83ed116")]
 [assembly: System.Reflection.AssemblyProductAttribute("BaoDamSelenium")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BaoDamSelenium")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

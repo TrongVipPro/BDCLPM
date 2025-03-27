@@ -54,9 +54,17 @@
               "target": "Package",
               "version": "[3.11.0, )"
             },
+            "EPPlus": {
+              "target": "Package",
+              "version": "[7.7.0, )"
+            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[17.8.0, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.7.3, )"
             },
             "NUnit": {
               "target": "Package",
